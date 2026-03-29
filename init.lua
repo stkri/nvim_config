@@ -347,6 +347,7 @@ require('lazy').setup({
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>d', group = '[D]ebug' },
       },
     },
   },
@@ -979,6 +980,9 @@ require('lazy').setup({
     end,
   },
 
+  { 'tpope/vim-fugitive' },
+  { 'mfussenegger/nvim-dap' },
+
   {
     'Julian/lean.nvim',
     event = { 'BufReadPre *.lean', 'BufNewFile *.lean' },
@@ -1001,8 +1005,6 @@ require('lazy').setup({
     opts = { -- see below for full configuration options
       mappings = true,
     },
-
-    { 'tpope/vim-fugitive' },
   },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
@@ -1053,5 +1055,72 @@ require('lazy').setup({
   },
 })
 
+vim.keymap.set('n', '<F5>', function()
+  require('dap').continue()
+end, { desc = 'DAP: Continue' })
+vim.keymap.set('n', '<F10>', function()
+  require('dap').step_over()
+end, { desc = 'DAP: Step Over' })
+vim.keymap.set('n', '<F11>', function()
+  require('dap').step_into()
+end, { desc = 'DAP: Step Into' })
+vim.keymap.set('n', '<F12>', function()
+  require('dap').step_out()
+end, { desc = 'DAP: Step Out' })
+vim.keymap.set('n', '<Leader>b', function()
+  require('dap').toggle_breakpoint()
+end, { desc = 'Toggle [B]reakpoint' })
+vim.keymap.set('n', '<Leader>B', function()
+  require('dap').set_breakpoint()
+end, { desc = 'Set [B]reakpoint' })
+vim.keymap.set('n', '<Leader>dp', function()
+  require('dap').set_breakpoint(nil, nil, vim.fn.input 'Log point message: ')
+end, { desc = 'Set Log [P]oint' })
+vim.keymap.set('n', '<Leader>dr', function()
+  require('dap').repl.open()
+end, { desc = 'Open [R]EPL' })
+vim.keymap.set('n', '<Leader>dl', function()
+  require('dap').run_last()
+end, { desc = 'Run [L]ast' })
+vim.keymap.set({ 'n', 'v' }, '<Leader>dh', function()
+  require('dap.ui.widgets').hover()
+end, { desc = '[H]over' })
+vim.keymap.set({ 'n', 'v' }, '<Leader>dp', function()
+  require('dap.ui.widgets').preview()
+end, { desc = '[P]review' })
+vim.keymap.set('n', '<Leader>df', function()
+  local widgets = require 'dap.ui.widgets'
+  widgets.centered_float(widgets.frames)
+end, { desc = '[F]rames' })
+vim.keymap.set('n', '<Leader>ds', function()
+  local widgets = require 'dap.ui.widgets'
+  widgets.centered_float(widgets.scopes)
+end, { desc = '[S]copes' })
+
+-- DAP init
+require('dap').adapters = {
+  lldb = {
+    type = 'executable',
+    command = '/usr/bin/lldb-dap',
+    name = 'lldb',
+  },
+}
+
+-- DAP config
+require('dap').configurations = {
+  rust = {
+    {
+      name = 'Launch',
+      type = 'lldb',
+      request = 'launch',
+      program = function()
+        return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/target/debug/', 'file')
+      end,
+      cwd = '${workspaceFolder}',
+      stopOnEntry = false,
+      args = {},
+    },
+  },
+}
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
