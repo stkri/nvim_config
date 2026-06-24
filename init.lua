@@ -160,7 +160,7 @@ vim.o.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.o.scrolloff = 10
-
+vim.o.guifont = 'FiraCode Nerd Font:12'
 -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
 -- instead raise a dialog asking if you wish to save the current file(s)
 -- See `:help 'confirm'`
@@ -678,7 +678,24 @@ require('lazy').setup({
         -- clangd = {},
         -- gopls = {},
         -- pyright = {},
-        rust_analyzer = {},
+        rust_analyzer = {
+          settings = {
+            workspace = {
+              symbol = {
+                search = {
+                  kind = 'all_symbols',
+                },
+              },
+            },
+            document = {
+              symbol = {
+                search = {
+                  excludeLocals = false,
+                },
+              },
+            },
+          },
+        },
         air = {},
         digestif = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -982,6 +999,7 @@ require('lazy').setup({
 
   { 'tpope/vim-fugitive' },
   { 'mfussenegger/nvim-dap' },
+  { 'rcarriga/nvim-dap-ui', dependencies = { 'mfussenegger/nvim-dap', 'nvim-neotest/nvim-nio' } },
 
   {
     'Julian/lean.nvim',
@@ -1055,6 +1073,8 @@ require('lazy').setup({
   },
 })
 
+require('dapui').setup()
+
 vim.keymap.set('n', '<F5>', function()
   require('dap').continue()
 end, { desc = 'DAP: Continue' })
@@ -1085,7 +1105,7 @@ end, { desc = 'Run [L]ast' })
 vim.keymap.set({ 'n', 'v' }, '<Leader>dh', function()
   require('dap.ui.widgets').hover()
 end, { desc = '[H]over' })
-vim.keymap.set({ 'n', 'v' }, '<Leader>dp', function()
+vim.keymap.set({ 'n', 'v' }, '<Leader>dP', function()
   require('dap.ui.widgets').preview()
 end, { desc = '[P]review' })
 vim.keymap.set('n', '<Leader>df', function()
@@ -1096,6 +1116,10 @@ vim.keymap.set('n', '<Leader>ds', function()
   local widgets = require 'dap.ui.widgets'
   widgets.centered_float(widgets.scopes)
 end, { desc = '[S]copes' })
+
+vim.keymap.set('n', '<Leader>du', function()
+  require('dapui').toggle()
+end, { desc = '[U]ser Interface' })
 
 -- DAP init
 require('dap').adapters = {
